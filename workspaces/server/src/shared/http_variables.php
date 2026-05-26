@@ -37,12 +37,15 @@ class HttpVariables
     }
     /**
      * @param 'message' | 'count' $key
-     * @return mixed
+     * @return ($key is 'message' ? string : ($key is 'count' ? int|float : never))
      */
     public function postJson(string $key): mixed
     {
-        /** @var array<string, mixed>|null $body */
-        $body = json_decode((string) file_get_contents('php://input'), true);
-        return $body[$key] ?? null;
+        $raw = json_decode((string) file_get_contents('php://input'), true);
+        $body = is_array($raw) ? $raw : [];
+        return match ($key) {
+            'message' => is_string($message = $body['message'] ?? '') ? $message : '',
+            'count' => is_int($count = $body['count'] ?? 0) || is_float($count) ? $count : 0.0,
+        };
     }
 }

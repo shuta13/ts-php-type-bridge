@@ -1,5 +1,9 @@
 {
   "GetParam": "'greeting' | 'name'",
   "PostFormDataKey": "'file' | 'label'",
+  "PostJsonBody": {
+    "message": "string",
+    "count": "number"
+  },
   "PostJsonKey": "'message' | 'count'"
 }

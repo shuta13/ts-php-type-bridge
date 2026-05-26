@@ -11,7 +11,16 @@ export type GetParam = 'greeting' | 'name';
 export type PostFormDataKey = 'file' | 'label';
 
 /**
- * Keys expected in the JSON body for POST /api/data.
- * Synced to PHP $key annotations via the type bridge pipeline.
+ * Shape of the JSON body for POST /api/data.
+ * Keys and value types are both synced to PHP via the type bridge pipeline.
  */
-export type PostJsonKey = 'message' | 'count';
+export type PostJsonBody = {
+  message: string;
+  count: number;
+};
+
+/**
+ * Keys expected in the JSON body for POST /api/data.
+ * Derived from PostJsonBody — synced to PHP $key annotations via the type bridge pipeline.
+ */
+export type PostJsonKey = keyof PostJsonBody;
