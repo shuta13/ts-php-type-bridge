@@ -6,16 +6,19 @@
     "workspaces/*"
   ],
   "scripts": {
-    "dev": "yarn workspace client dev",
+    "dev": "npm -w client run dev",
     "server": "php -S localhost:9999 -t workspaces/server/src",
-    "bridge:extract": "yarn workspace types-bridge extract",
+    "bridge:extract": "npm -w types-bridge run extract",
     "bridge:apply": "composer --working-dir=workspaces/server run bridge",
-    "bridge": "yarn bridge:extract && yarn bridge:apply",
+    "bridge": "npm run bridge:extract && npm run bridge:apply",
     "phpstan": "composer --working-dir=workspaces/server run phpstan",
-    "typecheck": "yarn workspace client typecheck && yarn workspace types-bridge typecheck",
+    "typecheck": "npm -w client run typecheck && npm -w types-bridge run typecheck",
     "format:php": "composer --working-dir=workspaces/server run format"
   },
   "devDependencies": {
     "typescript": "^5.8.3"
+  },
+  "overrides": {
+    "postcss": ">=8.5.10"
   }
 }

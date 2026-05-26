@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 /**
  * Typed wrappers around PHP superglobals.
  *
@@ -9,7 +8,7 @@ declare(strict_types=1);
  * managed by the type bridge pipeline:
  *
  *   1. Types are defined in workspaces/types-bridge/src/api.ts
- *   2. `yarn bridge:extract` parses the TS AST and writes json/api.json
+ *   2. `npm run bridge:extract` parses the TS AST and writes json/api.json
  *   3. `composer run bridge` uses PHP-Parser to rewrite these phpdoc annotations
  *   4. `composer run phpstan` validates the result
  */
@@ -17,13 +16,13 @@ class HttpVariables
 {
     /**
      * @param 'greeting' | 'name' $key
-     * @return mixed
+     * @return string
      */
-    public function get(string $key): mixed
+    public function get(string $key): string
     {
-        return htmlspecialchars((string) ($_GET[$key] ?? ''));
+        $raw = $_GET[$key] ?? '';
+        return htmlspecialchars(is_string($raw) ? $raw : '');
     }
-
     /**
      * @param 'file' | 'label' $key
      * @return mixed
@@ -33,9 +32,9 @@ class HttpVariables
         if (isset($_FILES[$key])) {
             return $_FILES[$key];
         }
-        return htmlspecialchars((string) ($_POST[$key] ?? ''));
+        $raw = $_POST[$key] ?? '';
+        return htmlspecialchars(is_string($raw) ? $raw : '');
     }
-
     /**
      * @param 'message' | 'count' $key
      * @return mixed

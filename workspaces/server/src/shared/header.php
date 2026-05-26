@@ -8,7 +8,8 @@ class Header
 
     public function __construct()
     {
-        $this->httpOrigin = $_SERVER['HTTP_ORIGIN'] ?? '';
+        $raw = $_SERVER['HTTP_ORIGIN'] ?? '';
+        $this->httpOrigin = is_string($raw) ? $raw : '';
     }
 
     public function set(): void

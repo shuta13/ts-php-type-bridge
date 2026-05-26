@@ -67,8 +67,8 @@ class TypeBridgeVisitor extends NodeVisitorAbstract
         $this->types = $types;
     }
 
-    /** @phpstan-return null */
-    public function enterNode(Node $node): null
+    /** @return null */
+    public function enterNode(Node $node): mixed
     {
         if (!($node instanceof ClassMethod)) {
             return null;
@@ -90,14 +90,21 @@ class TypeBridgeVisitor extends NodeVisitorAbstract
 
         $paramType = $this->types[$typeKey];
 
-        $doc = <<<DOC
-        /**
-         * @param {$paramType} \$key
-         * @return mixed
-         */
-        DOC;
+        // Preserve every existing phpdoc line except the @param $key line,
+        // then replace only that line with the newly bridged type.
+        $existing = $node->getDocComment();
+        $lines = $existing !== null
+            ? preg_split('/\n/', $existing->getText()) ?? []
+            : ['/**', ' */'];
 
-        $node->setDocComment(new Doc($doc));
+        $newLines = array_map(function (string $line) use ($paramType): string {
+            if (preg_match('/@param\s+.*\$key/', $line)) {
+                return " * @param {$paramType} \$key";
+            }
+            return $line;
+        }, $lines);
+
+        $node->setDocComment(new Doc(implode("\n", $newLines)));
 
         return null;
     }
