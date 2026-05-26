@@ -3,7 +3,11 @@
   "PostFormDataKey": "'file' | 'label'",
   "PostJsonBody": {
     "message": "string",
-    "count": "number"
+    "count": "number",
+    "author": {
+      "name": "string",
+      "age": "number"
+    }
   },
-  "PostJsonKey": "'message' | 'count'"
+  "PostJsonKey": "'message' | 'count' | 'author'"
 }

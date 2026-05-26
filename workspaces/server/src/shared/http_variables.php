@@ -36,16 +36,18 @@ class HttpVariables
         return htmlspecialchars(is_string($raw) ? $raw : '');
     }
     /**
-     * @param 'message' | 'count' $key
-     * @return ($key is 'message' ? string : ($key is 'count' ? int|float : never))
+     * @param 'message' | 'count' | 'author' $key
+     * @return ($key is 'message' ? string : ($key is 'count' ? int|float : ($key is 'author' ? array{name: string, age: int|float} : never)))
      */
     public function postJson(string $key): mixed
     {
         $raw = json_decode((string) file_get_contents('php://input'), true);
         $body = is_array($raw) ? $raw : [];
+        $_author = is_array($body['author'] ?? null) ? $body['author'] : [];
         return match ($key) {
             'message' => is_string($message = $body['message'] ?? '') ? $message : '',
             'count' => is_int($count = $body['count'] ?? 0) || is_float($count) ? $count : 0.0,
+            'author' => ['name' => is_string($_author_name = $_author['name'] ?? '') ? $_author_name : '', 'age' => is_int($_author_age = $_author['age'] ?? 0) || is_float($_author_age) ? $_author_age : 0.0],
         };
     }
 }

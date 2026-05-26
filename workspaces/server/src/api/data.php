@@ -10,12 +10,12 @@ header('Content-Type: application/json');
 
 $vars = new HttpVariables();
 
-/** @var mixed $message */
 $message = $vars->postJson('message');
-/** @var mixed $count */
-$count = $vars->postJson('count');
+$count   = $vars->postJson('count');
+$author  = $vars->postJson('author');
 
 echo json_encode([
     'echo'    => $message,
-    'doubled' => is_numeric($count) ? (int) $count * 2 : null,
+    'doubled' => $count * 2,
+    'author'  => $author,
 ]);

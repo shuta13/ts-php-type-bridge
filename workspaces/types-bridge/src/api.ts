@@ -17,6 +17,10 @@ export type PostFormDataKey = 'file' | 'label';
 export type PostJsonBody = {
   message: string;
   count: number;
+  author: {
+    name: string;
+    age: number;
+  };
 };
 
 /**
