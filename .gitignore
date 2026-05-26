@@ -1,0 +1,21 @@
+# Node
+node_modules/
+.next/
+dist/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# PHP
+/workspaces/server/vendor/
+
+
+# Environment
+.env
+.env.local
+.env*.local
+
+# OS
+.DS_Store
+Thumbs.db

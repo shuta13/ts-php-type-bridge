@@ -1,0 +1,21 @@
+{
+  "name": "ts-php-type-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "workspaces/*"
+  ],
+  "scripts": {
+    "dev": "yarn workspace client dev",
+    "server": "php -S localhost:9999 -t workspaces/server/src",
+    "bridge:extract": "yarn workspace types-bridge extract",
+    "bridge:apply": "composer --working-dir=workspaces/server run bridge",
+    "bridge": "yarn bridge:extract && yarn bridge:apply",
+    "phpstan": "composer --working-dir=workspaces/server run phpstan",
+    "typecheck": "yarn workspace client typecheck && yarn workspace types-bridge typecheck",
+    "format:php": "composer --working-dir=workspaces/server run format"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}
