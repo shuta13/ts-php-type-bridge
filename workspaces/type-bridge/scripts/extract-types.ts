@@ -6,8 +6,8 @@
  * - Object literal types → Record<string, ExtractedShape> (recursive key → value type)
  * - `keyof X` types      → resolved to a union string from the referenced shape's top-level keys
  *
- * Run: yarn workspace types-bridge extract
- * Output: workspaces/types-bridge/json/api.json
+ * Run: yarn workspace type-bridge extract
+ * Output: workspaces/type-bridge/json/api.json
  */
 import * as ts from 'typescript';
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';

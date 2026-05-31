@@ -8,11 +8,11 @@
   "scripts": {
     "dev": "npm -w client run dev",
     "server": "php -S localhost:9999 -t workspaces/server/src",
-    "bridge:extract": "npm -w types-bridge run extract",
+    "bridge:extract": "npm -w type-bridge run extract",
     "bridge:apply": "composer --working-dir=workspaces/server run bridge",
     "bridge": "npm run bridge:extract && npm run bridge:apply",
     "phpstan": "composer --working-dir=workspaces/server run phpstan",
-    "typecheck": "npm -w client run typecheck && npm -w types-bridge run typecheck",
+    "typecheck": "npm -w client run typecheck && npm -w type-bridge run typecheck",
     "format:php": "composer --working-dir=workspaces/server run format"
   },
   "devDependencies": {

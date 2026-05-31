@@ -7,7 +7,7 @@ declare (strict_types=1);
  * The @param type annotations on get(), postFormData(), and postJson() are
  * managed by the type bridge pipeline:
  *
- *   1. Types are defined in workspaces/types-bridge/src/api.ts
+ *   1. Types are defined in workspaces/type-bridge/src/api.ts
  *   2. `npm run bridge:extract` parses the TS AST and writes json/api.json
  *   3. `composer run bridge` uses PHP-Parser to rewrite these phpdoc annotations
  *   4. `composer run phpstan` validates the result

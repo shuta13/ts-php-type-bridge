@@ -1,10 +1,10 @@
-import type { GetParam, PostFormDataKey, PostJsonKey } from 'types-bridge';
+import type { GetParam, PostFormDataKey, PostJsonKey } from 'type-bridge';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:9999';
 
 /**
  * GET /api/hello.php
- * Keys are constrained to GetParam from the shared types-bridge package.
+ * Keys are constrained to GetParam from the shared type-bridge package.
  */
 export async function apiGet(params: Partial<Record<GetParam, string>>): Promise<Response> {
   const searchParams = new URLSearchParams(params);
@@ -16,7 +16,7 @@ export async function apiGet(params: Partial<Record<GetParam, string>>): Promise
 
 /**
  * POST /api/upload.php with FormData
- * Keys are constrained to PostFormDataKey from the shared types-bridge package.
+ * Keys are constrained to PostFormDataKey from the shared type-bridge package.
  */
 export async function apiPostFormData(
   data: Partial<Record<PostFormDataKey, string | Blob>>,
@@ -36,7 +36,7 @@ export async function apiPostFormData(
 
 /**
  * POST /api/data.php with JSON body
- * Keys are constrained to PostJsonKey from the shared types-bridge package.
+ * Keys are constrained to PostJsonKey from the shared type-bridge package.
  */
 export async function apiPostJson(
   data: Partial<Record<PostJsonKey, unknown>>,

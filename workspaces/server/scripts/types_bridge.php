@@ -3,7 +3,7 @@
 /**
  * types_bridge.php
  *
- * Reads the JSON produced by `yarn bridge:extract` (workspaces/types-bridge/json/api.json)
+ * Reads the JSON produced by `yarn bridge:extract` (workspaces/type-bridge/json/api.json)
  * and uses PHP-Parser to rewrite HttpVariables in src/shared/http_variables.php:
  *
  * - Union literal types (string values in JSON) → rewrites @param $key annotation
@@ -28,7 +28,7 @@ use PhpParser\ParserFactory;
 use PhpParser\PrettyPrinter;
 
 $targetPhpFile = __DIR__ . '/../src/shared/http_variables.php';
-$typesJsonFile = __DIR__ . '/../../types-bridge/json/api.json';
+$typesJsonFile = __DIR__ . '/../../type-bridge/json/api.json';
 
 if (!file_exists($typesJsonFile)) {
     echo "Error: types JSON not found at {$typesJsonFile}\n";
