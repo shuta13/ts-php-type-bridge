@@ -56,3 +56,9 @@ export type TsOpenShape = {
   required: string;
   [key: string]: unknown;
 };
+
+// 13. 交差型
+export type TsIntersection = { name: string } & { age: number };
+
+// 14. never型
+export type TsNever = never;

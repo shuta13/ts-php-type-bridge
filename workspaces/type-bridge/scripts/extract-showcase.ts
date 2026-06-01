@@ -37,7 +37,8 @@ type ExtractedShape =
   | { __kind: 'tuple'; elements: ExtractedShape[] }
   | { __kind: 'record'; key: string; value: ExtractedShape }
   | { __kind: 'nullable'; inner: ExtractedShape }
-  | { __kind: 'union'; members: ExtractedShape[] };
+  | { __kind: 'union'; members: ExtractedShape[] }
+  | { __kind: 'intersection'; members: ExtractedShape[] };
 
 function extractTypeNode(node: ts.TypeNode): ExtractedShape {
   // T[]
@@ -69,6 +70,11 @@ function extractTypeNode(node: ts.TypeNode): ExtractedShape {
       };
     }
     return node.getText(sourceFile);
+  }
+
+  // T & U & ...
+  if (ts.isIntersectionTypeNode(node)) {
+    return { __kind: 'intersection', members: node.types.map(extractTypeNode) };
   }
 
   // T | U | ... — split nullable from other unions

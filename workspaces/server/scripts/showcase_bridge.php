@@ -78,6 +78,8 @@ class ShowcaseBridgeVisitor extends NodeVisitorAbstract
         'record'        => 'TsRecord',
         'nested'        => 'TsNested',
         'openShape'     => 'TsOpenShape',
+        'intersection'  => 'TsIntersection',
+        'neverType'     => 'TsNever',
     ];
 
     /** @param array<string, mixed> $types */
@@ -141,8 +143,9 @@ class ShowcaseBridgeVisitor extends NodeVisitorAbstract
                 . $this->buildPhpstanType($shape['value'])
                 . '>',
             'nullable' => $this->buildPhpstanType($shape['inner']) . '|null',
-            'union'    => implode('|', array_map([$this, 'buildPhpstanType'], (array) $shape['members'])),
-            default    => 'mixed',
+            'union'        => implode('|', array_map([$this, 'buildPhpstanType'], (array) $shape['members'])),
+            'intersection' => $this->buildIntersectionType((array) $shape['members']),
+            default        => 'mixed',
         };
     }
 
@@ -170,6 +173,38 @@ class ShowcaseBridgeVisitor extends NodeVisitorAbstract
         }
 
         return "array{{$inner}}";
+    }
+
+    /**
+     * 交差型を生成する。
+     * 配列形状メンバーは PHPStan 2.2 の Unsealed 形式（bare `...`）に変換して `&` で連結する。
+     * array{a: int, ...}&array{b: string, ...} → PHPStan が array{a: int, b: string, ...} と解釈する。
+     *
+     * @param array<int, mixed> $members
+     */
+    private function buildIntersectionType(array $members): string
+    {
+        $parts = array_map(function (mixed $member): string {
+            if (is_array($member) && ($member['__kind'] ?? '') === 'object') {
+                return $this->buildUnsealedObjectType($member);
+            }
+            return $this->buildPhpstanType($member);
+        }, $members);
+        return implode('&', $parts);
+    }
+
+    /** @param array<string, mixed> $shape */
+    private function buildUnsealedObjectType(array $shape): string
+    {
+        $parts = [];
+        foreach ((array) ($shape['properties'] ?? []) as $key => $prop) {
+            $prop    = (array) $prop;
+            $typeStr = $this->buildPhpstanType($prop['type'] ?? 'mixed');
+            $opt     = (bool) ($prop['optional'] ?? false) ? '?' : '';
+            $parts[] = "{$key}{$opt}: {$typeStr}";
+        }
+        $inner = implode(', ', $parts);
+        return $inner !== '' ? "array{{$inner}, ...}" : 'array{...}';
     }
 
     /** @param array<int, mixed> $elements */

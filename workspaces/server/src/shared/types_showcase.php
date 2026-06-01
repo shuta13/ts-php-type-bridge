@@ -13,6 +13,7 @@ declare (strict_types=1);
  * ─── 再現困難 (サポート予定なし 2026/06 時点) ───────────────────────────────
  *   Mapped types:           { [K in keyof T]: ... }
  *   Template literal types: `${string}Id`
+ *   symbol:                 PHP にシンボルの概念がなく、PHPStan にも対応型なし (mixed すら意味論を再現できない)
  *
  * @phpstan-type TsPrimitivesAlias array{str: string, num: int|float, bool: bool, nul: null}
  */
@@ -131,6 +132,24 @@ class TypesShowcase
     {
         throw new \LogicException('showcase only');
     }
+    /**
+     * TypeScript: { name: string } & { age: number }
+     *
+     * @return array{name: string, ...}&array{age: int|float, ...}
+     */
+    public function intersection(): mixed
+    {
+        throw new \LogicException('showcase only');
+    }
+    /**
+     * TypeScript: never
+     *
+     * @return never
+     */
+    public function neverType(): mixed
+    {
+        throw new \LogicException('showcase only');
+    }
     // =========================================================================
     // 手動サンプル: ブリッジ管理外
     // =========================================================================
@@ -158,6 +177,28 @@ class TypesShowcase
         return 'example';
     }
     /**
+     * TypeScript: unknown  →  PHPStan: mixed（部分再現）
+     * TypeScript の unknown は「使用前に型を絞り込まないとコンパイルエラー」という安全性がある。
+     * PHPStan の mixed は絞り込みなしでも使えるため、unknown の型安全性は再現できない。
+     *
+     * @return mixed
+     */
+    public function unknownType(): mixed
+    {
+        throw new \LogicException('showcase only');
+    }
+    /**
+     * TypeScript: any  →  PHPStan: mixed（部分再現）
+     * TypeScript の any は型チェックを完全にスキップする。
+     * PHPStan の mixed は any と異なり型チェックの対象になるため、完全な再現ではない。
+     *
+     * @return mixed
+     */
+    public function anyType(): mixed
+    {
+        throw new \LogicException('showcase only');
+    }
+    /**
      * TypeScript: T extends U ? X : Y（部分再現）/ infer（部分再現）
      * PHPStan:    @template + 条件型（戻り値の絞り込みに限り対応）
      *
@@ -166,6 +207,40 @@ class TypesShowcase
      * @return (T is int ? string : list<string>)
      */
     public function conditional(mixed $value): mixed
+    {
+        throw new \LogicException('showcase only');
+    }
+    /**
+     * TypeScript: Partial<{ name: string; age: number }>（部分再現）
+     * PHPStan:    全プロパティに ? を付けた array{...} を手動で記述（ジェネリック変換不可）
+     * Mapped types が必要なため、特定の型に対してのみ手動で再現できる。
+     *
+     * @return array{name?: string, age?: int|float}
+     */
+    public function partial(): mixed
+    {
+        throw new \LogicException('showcase only');
+    }
+    /**
+     * TypeScript: Required<{ name?: string; age?: number }>（部分再現）
+     * PHPStan:    全プロパティから ? を除いた array{...} を手動で記述（ジェネリック変換不可）
+     * Mapped types が必要なため、特定の型に対してのみ手動で再現できる。
+     *
+     * @return array{name: string, age: int|float}
+     */
+    public function required(): mixed
+    {
+        throw new \LogicException('showcase only');
+    }
+    /**
+     * TypeScript: NonNullable<string | null>（部分再現）
+     * PHPStan:    |null を除いた型を手動で記述（ジェネリック変換不可）
+     * 特定の型に対しては null を含まない型として表現できるが、
+     * ジェネリックな NonNullable<T> に相当する PHPStan 構文は存在しない。
+     *
+     * @return string
+     */
+    public function nonNullable(): mixed
     {
         throw new \LogicException('showcase only');
     }

@@ -158,5 +158,31 @@
       "key": "string",
       "value": "unknown"
     }
-  }
+  },
+  "TsIntersection": {
+    "__kind": "intersection",
+    "members": [
+      {
+        "__kind": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "optional": false
+          }
+        },
+        "sealed": true
+      },
+      {
+        "__kind": "object",
+        "properties": {
+          "age": {
+            "type": "number",
+            "optional": false
+          }
+        },
+        "sealed": true
+      }
+    ]
+  },
+  "TsNever": "never"
 }
