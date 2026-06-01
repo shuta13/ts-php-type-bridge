@@ -8,6 +8,7 @@
   },
   "scripts": {
     "extract": "tsx scripts/extract-types.ts",
+    "extract:showcase": "tsx scripts/extract-showcase.ts",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

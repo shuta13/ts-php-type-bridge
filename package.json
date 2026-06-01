@@ -11,6 +11,9 @@
     "bridge:extract": "npm -w type-bridge run extract",
     "bridge:apply": "composer --working-dir=workspaces/server run bridge",
     "bridge": "npm run bridge:extract && npm run bridge:apply",
+    "bridge:showcase": "npm run bridge:showcase:extract && npm run bridge:showcase:apply",
+    "bridge:showcase:extract": "npm -w type-bridge run extract:showcase",
+    "bridge:showcase:apply": "composer --working-dir=workspaces/server run bridge:showcase",
     "phpstan": "composer --working-dir=workspaces/server run phpstan",
     "typecheck": "npm -w client run typecheck && npm -w type-bridge run typecheck",
     "format:php": "composer --working-dir=workspaces/server run format"

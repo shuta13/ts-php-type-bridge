@@ -1,0 +1,162 @@
+{
+  "TsPrimitives": {
+    "__kind": "object",
+    "properties": {
+      "str": {
+        "type": "string",
+        "optional": false
+      },
+      "num": {
+        "type": "number",
+        "optional": false
+      },
+      "bool": {
+        "type": "boolean",
+        "optional": false
+      },
+      "nul": {
+        "type": "null",
+        "optional": false
+      }
+    },
+    "sealed": true
+  },
+  "TsStatus": {
+    "__kind": "union",
+    "members": [
+      "'draft'",
+      "'published'",
+      "'archived'"
+    ]
+  },
+  "TsLevel": {
+    "__kind": "union",
+    "members": [
+      "1",
+      "2",
+      "3"
+    ]
+  },
+  "TsNullable": {
+    "__kind": "union",
+    "members": [
+      "string",
+      "null"
+    ]
+  },
+  "TsUnion": {
+    "__kind": "union",
+    "members": [
+      "string",
+      "number",
+      "boolean"
+    ]
+  },
+  "TsOptionalShape": {
+    "__kind": "object",
+    "properties": {
+      "required": {
+        "type": "string",
+        "optional": false
+      },
+      "optional": {
+        "type": "number",
+        "optional": true
+      },
+      "nullableOpt": {
+        "type": {
+          "__kind": "union",
+          "members": [
+            "string",
+            "null"
+          ]
+        },
+        "optional": true
+      }
+    },
+    "sealed": true
+  },
+  "TsStringArray": {
+    "__kind": "array",
+    "element": "string"
+  },
+  "TsObjectArray": {
+    "__kind": "array",
+    "element": {
+      "__kind": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "optional": false
+        },
+        "label": {
+          "type": "string",
+          "optional": false
+        }
+      },
+      "sealed": true
+    }
+  },
+  "TsPair": {
+    "__kind": "tuple",
+    "elements": [
+      "string",
+      "number"
+    ]
+  },
+  "TsRecord": {
+    "__kind": "record",
+    "key": "string",
+    "value": "number"
+  },
+  "TsNested": {
+    "__kind": "object",
+    "properties": {
+      "user": {
+        "type": {
+          "__kind": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "optional": false
+            },
+            "address": {
+              "type": {
+                "__kind": "object",
+                "properties": {
+                  "city": {
+                    "type": "string",
+                    "optional": false
+                  },
+                  "zip": {
+                    "type": "number",
+                    "optional": false
+                  }
+                },
+                "sealed": true
+              },
+              "optional": false
+            }
+          },
+          "sealed": true
+        },
+        "optional": false
+      }
+    },
+    "sealed": true
+  },
+  "TsOpenShape": {
+    "__kind": "object",
+    "properties": {
+      "required": {
+        "type": "string",
+        "optional": false
+      }
+    },
+    "sealed": false,
+    "extra": {
+      "key": "string",
+      "value": "unknown"
+    }
+  }
+}
