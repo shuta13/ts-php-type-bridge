@@ -60,13 +60,13 @@ function extractTypeNode(node: ts.TypeNode): ExtractedShape {
       ? node.typeName.text
       : node.typeName.getText(sourceFile);
     if (name === 'Array' && node.typeArguments?.length === 1) {
-      return { __kind: 'array', element: extractTypeNode(node.typeArguments[0]) };
+      return { __kind: 'array', element: extractTypeNode(node.typeArguments[0]!) };
     }
     if (name === 'Record' && node.typeArguments?.length === 2) {
       return {
         __kind: 'record',
-        key: node.typeArguments[0].getText(sourceFile),
-        value: extractTypeNode(node.typeArguments[1]),
+        key: node.typeArguments[0]!.getText(sourceFile),
+        value: extractTypeNode(node.typeArguments[1]!),
       };
     }
     return node.getText(sourceFile);
@@ -82,7 +82,7 @@ function extractTypeNode(node: ts.TypeNode): ExtractedShape {
     const members = [...node.types];
     const nullIdx = members.findIndex((m) => m.kind === ts.SyntaxKind.NullKeyword);
     if (nullIdx !== -1 && members.length === 2) {
-      const inner = members[nullIdx === 0 ? 1 : 0];
+      const inner = members[nullIdx === 0 ? 1 : 0]!;
       return { __kind: 'nullable', inner: extractTypeNode(inner) };
     }
     return { __kind: 'union', members: members.map(extractTypeNode) };
