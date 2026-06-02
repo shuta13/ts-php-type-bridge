@@ -245,6 +245,17 @@ class TypesShowcase
         throw new \LogicException('showcase only');
     }
     /**
+     * TypeScript: function f(): void
+     * PHPStan:    PHP 7.1+ ネイティブ void 戻り値型 / @return void
+     * TypeScript の void は変数型としても使えるが、PHP では戻り値型専用。
+     *
+     * @return void
+     */
+    public function voidReturn(): void
+    {
+        throw new \LogicException('showcase only');
+    }
+    /**
      * TypeScript: function identity<T>(arg: T): T
      * PHPStan:    @template
      *
