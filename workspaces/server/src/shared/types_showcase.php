@@ -244,6 +244,44 @@ class TypesShowcase
     {
         throw new \LogicException('showcase only');
     }
+    /**
+     * TypeScript: function identity<T>(arg: T): T
+     * PHPStan:    @template
+     *
+     * @template T
+     * @param T $value
+     * @return T
+     */
+    public function identity(mixed $value): mixed
+    {
+        throw new \LogicException('showcase only');
+    }
+    /**
+     * TypeScript: function wrap<T extends object>(arg: T): { value: T }
+     * PHPStan:    @template T of object（上限制約）
+     *
+     * @template T of object
+     * @param T $value
+     * @return array{value: T}
+     */
+    public function wrap(mixed $value): mixed
+    {
+        throw new \LogicException('showcase only');
+    }
+    /**
+     * TypeScript: function pair<T, U>(a: T, b: U): [T, U]
+     * PHPStan:    複数 @template
+     *
+     * @template T
+     * @template U
+     * @param T $a
+     * @param U $b
+     * @return array{0: T, 1: U}
+     */
+    public function genericPair(mixed $a, mixed $b): mixed
+    {
+        throw new \LogicException('showcase only');
+    }
 }
 /**
  * TypeScript: Readonly<T>（部分再現）
@@ -253,5 +291,23 @@ class ReadonlyExample
 {
     public function __construct(public readonly string $name, public readonly int $age)
     {
+    }
+}
+/**
+ * TypeScript: class Box<T> { constructor(private value: T) {} get(): T }
+ * PHPStan:    クラス docblock に @template を付与してジェネリッククラスを表現
+ *
+ * @template T
+ */
+class Box
+{
+    /** @param T $value */
+    public function __construct(private mixed $value)
+    {
+    }
+    /** @return T */
+    public function get(): mixed
+    {
+        return $this->value;
     }
 }
