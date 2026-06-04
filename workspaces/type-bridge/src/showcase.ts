@@ -4,13 +4,11 @@
  * showcase_bridge.php が types_showcase.php のアノテーションを生成する。
  */
 
-// 1. プリミティブ型をまとめたオブジェクト形状
-export type TsPrimitives = {
-  str: string;
-  num: number;
-  bool: boolean;
-  nul: null;
-};
+// 1. プリミティブ型（個別）
+export type TsString = string;
+export type TsNumber = number;
+export type TsBoolean = boolean;
+export type TsNull = null;
 
 // 2. 文字列リテラルユニオン
 export type TsStatus = 'draft' | 'published' | 'archived';

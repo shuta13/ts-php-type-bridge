@@ -1,26 +1,8 @@
 {
-  "TsPrimitives": {
-    "__kind": "object",
-    "properties": {
-      "str": {
-        "type": "string",
-        "optional": false
-      },
-      "num": {
-        "type": "number",
-        "optional": false
-      },
-      "bool": {
-        "type": "boolean",
-        "optional": false
-      },
-      "nul": {
-        "type": "null",
-        "optional": false
-      }
-    },
-    "sealed": true
-  },
+  "TsString": "string",
+  "TsNumber": "number",
+  "TsBoolean": "boolean",
+  "TsNull": "null",
   "TsStatus": {
     "__kind": "union",
     "members": [

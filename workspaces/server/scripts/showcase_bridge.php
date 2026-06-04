@@ -66,7 +66,10 @@ class ShowcaseBridgeVisitor extends NodeVisitorAbstract
 
     /** @var array<string, string> method name → JSON key */
     private array $methodToTypeKey = [
-        'primitives'    => 'TsPrimitives',
+        'tsString'      => 'TsString',
+        'tsNumber'      => 'TsNumber',
+        'tsBoolean'     => 'TsBoolean',
+        'tsNull'        => 'TsNull',
         'status'        => 'TsStatus',
         'level'         => 'TsLevel',
         'nullable'      => 'TsNullable',

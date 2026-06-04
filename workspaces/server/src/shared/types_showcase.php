@@ -15,7 +15,7 @@ declare (strict_types=1);
  *   Template literal types: `${string}Id`
  *   symbol:                 PHP にシンボルの概念がなく、PHPStan にも対応型なし (mixed すら意味論を再現できない)
  *
- * @phpstan-type TsPrimitivesAlias array{str: string, num: int|float, bool: bool, nul: null}
+ * @phpstan-type TsOptionalShapeAlias array{required: string, optional?: int|float, nullableOpt?: string|null}
  */
 class TypesShowcase
 {
@@ -24,11 +24,38 @@ class TypesShowcase
     // showcase_bridge.php が @return アノテーションを自動書き換えする。
     // =========================================================================
     /**
-     * TypeScript: { str: string; num: number; bool: boolean; nul: null }
+     * TypeScript: string
      *
-     * @return array{str: string, num: int|float, bool: bool, nul: null}
+     * @return string
      */
-    public function primitives(): mixed
+    public function tsString(): mixed
+    {
+        throw new \LogicException('showcase only');
+    }
+    /**
+     * TypeScript: number
+     *
+     * @return int|float
+     */
+    public function tsNumber(): mixed
+    {
+        throw new \LogicException('showcase only');
+    }
+    /**
+     * TypeScript: boolean
+     *
+     * @return bool
+     */
+    public function tsBoolean(): mixed
+    {
+        throw new \LogicException('showcase only');
+    }
+    /**
+     * TypeScript: null
+     *
+     * @return null
+     */
+    public function tsNull(): mixed
     {
         throw new \LogicException('showcase only');
     }
@@ -170,7 +197,7 @@ class TypesShowcase
      * TypeScript: T['key']
      * PHPStan:    @phpstan-type エイリアスへのオフセットアクセス（クラス docblock に定義）
      *
-     * @return TsPrimitivesAlias['str']
+     * @return TsOptionalShapeAlias['required']
      */
     public function offsetAccess(): string
     {
