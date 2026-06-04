@@ -30,7 +30,7 @@ class TypesShowcase
      */
     public function tsString(): mixed
     {
-        throw new \LogicException('showcase only');
+        return '';
     }
     /**
      * TypeScript: number
@@ -39,7 +39,7 @@ class TypesShowcase
      */
     public function tsNumber(): mixed
     {
-        throw new \LogicException('showcase only');
+        return 0;
     }
     /**
      * TypeScript: boolean
@@ -48,7 +48,7 @@ class TypesShowcase
      */
     public function tsBoolean(): mixed
     {
-        throw new \LogicException('showcase only');
+        return false;
     }
     /**
      * TypeScript: null
@@ -57,7 +57,7 @@ class TypesShowcase
      */
     public function tsNull(): mixed
     {
-        throw new \LogicException('showcase only');
+        return null;
     }
     /**
      * TypeScript: 'draft' | 'published' | 'archived'
@@ -66,7 +66,7 @@ class TypesShowcase
      */
     public function status(): mixed
     {
-        throw new \LogicException('showcase only');
+        return 'draft';
     }
     /**
      * TypeScript: 1 | 2 | 3
@@ -75,7 +75,7 @@ class TypesShowcase
      */
     public function level(): mixed
     {
-        throw new \LogicException('showcase only');
+        return 1;
     }
     /**
      * TypeScript: string | null
@@ -84,7 +84,7 @@ class TypesShowcase
      */
     public function nullable(): mixed
     {
-        throw new \LogicException('showcase only');
+        return null;
     }
     /**
      * TypeScript: string | number | boolean
@@ -93,7 +93,7 @@ class TypesShowcase
      */
     public function union(): mixed
     {
-        throw new \LogicException('showcase only');
+        return '';
     }
     /**
      * TypeScript: { required: string; optional?: number; nullableOpt?: string | null }
@@ -102,7 +102,7 @@ class TypesShowcase
      */
     public function optionalShape(): mixed
     {
-        throw new \LogicException('showcase only');
+        return ['required' => ''];
     }
     /**
      * TypeScript: string[]
@@ -111,7 +111,7 @@ class TypesShowcase
      */
     public function stringArray(): mixed
     {
-        throw new \LogicException('showcase only');
+        return [];
     }
     /**
      * TypeScript: Array<{ id: number; label: string }>
@@ -120,7 +120,7 @@ class TypesShowcase
      */
     public function objectArray(): mixed
     {
-        throw new \LogicException('showcase only');
+        return [];
     }
     /**
      * TypeScript: [string, number]
@@ -129,7 +129,7 @@ class TypesShowcase
      */
     public function pair(): mixed
     {
-        throw new \LogicException('showcase only');
+        return ['', 0];
     }
     /**
      * TypeScript: Record<string, number>
@@ -138,7 +138,7 @@ class TypesShowcase
      */
     public function record(): mixed
     {
-        throw new \LogicException('showcase only');
+        return [];
     }
     /**
      * TypeScript: { user: { name: string; address: { city: string; zip: number } } }
@@ -147,7 +147,7 @@ class TypesShowcase
      */
     public function nested(): mixed
     {
-        throw new \LogicException('showcase only');
+        return ['user' => ['name' => '', 'address' => ['city' => '', 'zip' => 0]]];
     }
     /**
      * TypeScript: { required: string; [key: string]: unknown }
@@ -157,7 +157,7 @@ class TypesShowcase
      */
     public function openShape(): mixed
     {
-        throw new \LogicException('showcase only');
+        return ['required' => ''];
     }
     /**
      * TypeScript: { name: string } & { age: number }
@@ -166,7 +166,7 @@ class TypesShowcase
      */
     public function intersection(): mixed
     {
-        throw new \LogicException('showcase only');
+        return array_merge(['name' => 'example'], ['age' => 30]);
     }
     /**
      * TypeScript: never
@@ -191,7 +191,7 @@ class TypesShowcase
      */
     public function colorByKey(string $key): string
     {
-        throw new \LogicException('showcase only');
+        return self::COLORS[$key];
     }
     /**
      * TypeScript: T['key']
@@ -212,7 +212,7 @@ class TypesShowcase
      */
     public function unknownType(): mixed
     {
-        throw new \LogicException('showcase only');
+        return null;
     }
     /**
      * TypeScript: any  →  PHPStan: mixed（部分再現）
@@ -223,7 +223,7 @@ class TypesShowcase
      */
     public function anyType(): mixed
     {
-        throw new \LogicException('showcase only');
+        return null;
     }
     /**
      * TypeScript: T extends U ? X : Y（部分再現）/ infer（部分再現）
@@ -235,7 +235,10 @@ class TypesShowcase
      */
     public function conditional(mixed $value): mixed
     {
-        throw new \LogicException('showcase only');
+        if (is_int($value)) {
+            return '';
+        }
+        return [];
     }
     /**
      * TypeScript: Partial<{ name: string; age: number }>（部分再現）
@@ -246,7 +249,7 @@ class TypesShowcase
      */
     public function partial(): mixed
     {
-        throw new \LogicException('showcase only');
+        return [];
     }
     /**
      * TypeScript: Required<{ name?: string; age?: number }>（部分再現）
@@ -257,7 +260,7 @@ class TypesShowcase
      */
     public function required(): mixed
     {
-        throw new \LogicException('showcase only');
+        return ['name' => '', 'age' => 0];
     }
     /**
      * TypeScript: NonNullable<string | null>（部分再現）
@@ -269,7 +272,7 @@ class TypesShowcase
      */
     public function nonNullable(): mixed
     {
-        throw new \LogicException('showcase only');
+        return '';
     }
     /**
      * TypeScript: function f(): void
@@ -280,7 +283,6 @@ class TypesShowcase
      */
     public function voidReturn(): void
     {
-        throw new \LogicException('showcase only');
     }
     /**
      * TypeScript: function identity<T>(arg: T): T
@@ -292,7 +294,7 @@ class TypesShowcase
      */
     public function identity(mixed $value): mixed
     {
-        throw new \LogicException('showcase only');
+        return $value;
     }
     /**
      * TypeScript: function wrap<T extends object>(arg: T): { value: T }
@@ -304,7 +306,7 @@ class TypesShowcase
      */
     public function wrap(mixed $value): mixed
     {
-        throw new \LogicException('showcase only');
+        return ['value' => $value];
     }
     /**
      * TypeScript: function pair<T, U>(a: T, b: U): [T, U]
@@ -318,7 +320,7 @@ class TypesShowcase
      */
     public function genericPair(mixed $a, mixed $b): mixed
     {
-        throw new \LogicException('showcase only');
+        return [$a, $b];
     }
 }
 /**
