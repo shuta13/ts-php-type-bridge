@@ -83,6 +83,15 @@ class ShowcaseBridgeVisitor extends NodeVisitorAbstract
         'openShape'     => 'TsOpenShape',
         'intersection'  => 'TsIntersection',
         'neverType'     => 'TsNever',
+        'unknownType'   => 'TsUnknown',
+        'anyType'       => 'TsAny',
+        'voidReturn'    => 'TsVoid',
+        'undefinedType' => 'TsUndefined',
+        'nonNullable'   => 'TsNonNullable',
+        'keyofType'     => 'TsKeyOf',
+        'offsetAccess'  => 'TsIndexedAccess',
+        'partial'       => 'TsPartial',
+        'required'      => 'TsRequired',
     ];
 
     /** @param array<string, mixed> $types */
@@ -148,6 +157,7 @@ class ShowcaseBridgeVisitor extends NodeVisitorAbstract
             'nullable' => $this->buildPhpstanType($shape['inner']) . '|null',
             'union'        => implode('|', array_map([$this, 'buildPhpstanType'], (array) $shape['members'])),
             'intersection' => $this->buildIntersectionType((array) $shape['members']),
+            'keyof'        => 'key-of<' . $this->buildPhpstanType($shape['operand']) . '>',
             default        => 'mixed',
         };
     }
@@ -231,6 +241,7 @@ class ShowcaseBridgeVisitor extends NodeVisitorAbstract
             'unknown'   => 'mixed',
             'any'       => 'mixed',
             'never'     => 'never',
+            'void'      => 'void',
             default     => $ts,
         };
     }

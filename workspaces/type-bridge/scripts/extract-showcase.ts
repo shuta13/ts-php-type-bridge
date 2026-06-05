@@ -12,6 +12,10 @@
  *   - Generic Array<T>                  → { __kind: 'array', element: ... }
  *   - Tuple [T, U]                      → { __kind: 'tuple', elements: [...] }
  *   - Record<K, V>                      → { __kind: 'record', key: K, value: ... }
+ *   - keyof T                           → { __kind: 'keyof', operand: ... }
+ *   - T['key']                          → resolveTypeRefs で property type に解決（JSON には残らない）
+ *   - Partial<T>                        → object shape の全プロパティを optional: true に変換
+ *   - Required<T>                       → object shape の全プロパティを optional: false に変換
  *
  * Run: npm -w type-bridge run extract:showcase
  * Output: workspaces/type-bridge/json/showcase.json
@@ -38,9 +42,25 @@ type ExtractedShape =
   | { __kind: 'record'; key: string; value: ExtractedShape }
   | { __kind: 'nullable'; inner: ExtractedShape }
   | { __kind: 'union'; members: ExtractedShape[] }
-  | { __kind: 'intersection'; members: ExtractedShape[] };
+  | { __kind: 'intersection'; members: ExtractedShape[] }
+  | { __kind: 'keyof'; operand: ExtractedShape }
+  | { __kind: 'indexedAccess'; object: ExtractedShape; key: string };
 
 function extractTypeNode(node: ts.TypeNode): ExtractedShape {
+  // keyof T
+  if (ts.isTypeOperatorNode(node) && node.operator === ts.SyntaxKind.KeyOfKeyword) {
+    return { __kind: 'keyof', operand: extractTypeNode(node.type) };
+  }
+
+  // T['key'] — indexed access type
+  if (ts.isIndexedAccessTypeNode(node)) {
+    const indexNode = node.indexType;
+    if (ts.isLiteralTypeNode(indexNode) && ts.isStringLiteral(indexNode.literal)) {
+      return { __kind: 'indexedAccess', object: extractTypeNode(node.objectType), key: indexNode.literal.text };
+    }
+    return node.getText(sourceFile);
+  }
+
   // T[]
   if (ts.isArrayTypeNode(node)) {
     return { __kind: 'array', element: extractTypeNode(node.elementType) };
@@ -68,6 +88,40 @@ function extractTypeNode(node: ts.TypeNode): ExtractedShape {
         key: node.typeArguments[0]!.getText(sourceFile),
         value: extractTypeNode(node.typeArguments[1]!),
       };
+    }
+    if (name === 'Partial' && node.typeArguments?.length === 1) {
+      const inner = extractTypeNode(node.typeArguments[0]!);
+      if (typeof inner === 'object' && inner.__kind === 'object') {
+        const props: Record<string, ExtractedProperty> = {};
+        for (const [k, v] of Object.entries(inner.properties)) {
+          props[k] = { type: v.type, optional: true };
+        }
+        return { ...inner, properties: props };
+      }
+      return inner;
+    }
+    if (name === 'Required' && node.typeArguments?.length === 1) {
+      const inner = extractTypeNode(node.typeArguments[0]!);
+      if (typeof inner === 'object' && inner.__kind === 'object') {
+        const props: Record<string, ExtractedProperty> = {};
+        for (const [k, v] of Object.entries(inner.properties)) {
+          props[k] = { type: v.type, optional: false };
+        }
+        return { ...inner, properties: props };
+      }
+      return inner;
+    }
+    if (name === 'NonNullable' && node.typeArguments?.length === 1) {
+      const inner = extractTypeNode(node.typeArguments[0]!);
+      if (typeof inner === 'object' && inner.__kind === 'nullable') {
+        return inner.inner;
+      }
+      if (typeof inner === 'object' && inner.__kind === 'union') {
+        const nonNull = inner.members.filter((m) => m !== 'null');
+        if (nonNull.length === 1) return nonNull[0]!;
+        return { __kind: 'union', members: nonNull };
+      }
+      return inner;
     }
     return node.getText(sourceFile);
   }
@@ -127,6 +181,39 @@ function extractTypeLiteral(node: ts.TypeLiteralNode): ExtractedShape {
   };
 }
 
+/**
+ * 型エイリアス参照を解決するポストプロセス。
+ *   keyof SomeType      → { __kind: 'keyof', operand: <SomeType の定義> }
+ *   SomeType['key']     → <SomeType.key の型> （JSON には indexedAccess は残らない）
+ */
+function resolveTypeRefs(
+  shape: ExtractedShape,
+  allTypes: Record<string, ExtractedShape>,
+): ExtractedShape {
+  if (typeof shape !== 'object') return shape;
+
+  if (shape.__kind === 'keyof') {
+    const operand = shape.operand;
+    if (typeof operand === 'string' && operand in allTypes) {
+      return { __kind: 'keyof', operand: allTypes[operand]! };
+    }
+    return shape;
+  }
+
+  if (shape.__kind === 'indexedAccess') {
+    let obj: ExtractedShape = shape.object;
+    if (typeof obj === 'string' && obj in allTypes) {
+      obj = allTypes[obj]!;
+    }
+    if (typeof obj === 'object' && obj.__kind === 'object' && shape.key in obj.properties) {
+      return obj.properties[shape.key]!.type;
+    }
+    return 'mixed';
+  }
+
+  return shape;
+}
+
 const types: Record<string, ExtractedShape> = {};
 
 function visit(node: ts.Node): void {
@@ -140,6 +227,11 @@ function visit(node: ts.Node): void {
 }
 
 visit(sourceFile);
+
+// 型エイリアス参照（keyof / T['key']）を解決する
+for (const key of Object.keys(types)) {
+  types[key] = resolveTypeRefs(types[key]!, types);
+}
 
 mkdirSync(dirname(outPath), { recursive: true });
 writeFileSync(outPath, JSON.stringify(types, null, 2) + '\n');

@@ -10,10 +10,15 @@ declare (strict_types=1);
  *   3. composer run bridge:showcase     → このファイルのアノテーションを書き換え
  *   4. composer run phpstan             → 型検証
  *
- * ─── 再現困難 (サポート予定なし 2026/06 時点) ───────────────────────────────
- *   Mapped types:           { [K in keyof T]: ... }
- *   Template literal types: `${string}Id`
- *   symbol:                 PHP にシンボルの概念がなく、PHPStan にも対応型なし (mixed すら意味論を再現できない)
+ * ─── type-bridge では再現不可 ───────────────────────────────────────────────
+ *   keyof T / T[keyof T]:              PHP クラス定数への key-of<T>/value-of<T> は PHP 固有の概念
+ *   T['key'] オフセットアクセス:         @phpstan-type エイリアスのオフセットアクセスは PHP 固有
+ *   Generics (@template):              TypeScript の型変数は PHPDoc @template と 1:1 対応せず自動変換不可
+ *   Conditional types (T extends U):   PHPStan 条件型は TS とは構文が異なり @template 手書きが必要
+ *   Mapped types (Partial/Required):   { [K in keyof T]: ... } に対応する PHPStan 構文がない
+ *   Readonly<T>:                       PHP 8.1 readonly はプロパティ単位の概念でジェネリック変換不可
+ *   symbol:                            PHP にシンボルの概念がなく PHPStan にも対応型なし
+ *   Template literal types:            `${string}Id` に相当する PHPStan 構文なし
  *
  * @phpstan-type TsOptionalShapeAlias array{required: string, optional?: int|float, nullableOpt?: string|null}
  */
@@ -56,6 +61,15 @@ class TypesShowcase
      * @return null
      */
     public function tsNull(): mixed
+    {
+        return null;
+    }
+    /**
+     * TypeScript: undefined
+     *
+     * @return null
+     */
+    public function undefinedType(): mixed
     {
         return null;
     }
@@ -177,35 +191,10 @@ class TypesShowcase
     {
         throw new \LogicException('showcase only');
     }
-    // =========================================================================
-    // 手動サンプル: ブリッジ管理外
-    // =========================================================================
-    /** @var array{red: string, green: string, blue: string} */
-    public const COLORS = ['red' => '#f00', 'green' => '#0f0', 'blue' => '#00f'];
     /**
-     * TypeScript: keyof T / T[keyof T]
-     * PHPStan:    key-of<T> / value-of<T>（クラス定数・enum に対して動作）
-     *
-     * @param key-of<self::COLORS> $key
-     * @return value-of<self::COLORS>
-     */
-    public function colorByKey(string $key): string
-    {
-        return self::COLORS[$key];
-    }
-    /**
-     * TypeScript: T['key']
-     * PHPStan:    @phpstan-type エイリアスへのオフセットアクセス（クラス docblock に定義）
-     *
-     * @return TsOptionalShapeAlias['required']
-     */
-    public function offsetAccess(): string
-    {
-        return 'example';
-    }
-    /**
-     * TypeScript: unknown  →  PHPStan: mixed（部分再現）
-     * TypeScript の unknown は「使用前に型を絞り込まないとコンパイルエラー」という安全性がある。
+     * TypeScript: unknown
+     * PHPStan: mixed（部分再現）
+     * TypeScript の unknown は使用前に型を絞り込まないとコンパイルエラーになる安全な型。
      * PHPStan の mixed は絞り込みなしでも使えるため、unknown の型安全性は再現できない。
      *
      * @return mixed
@@ -215,7 +204,8 @@ class TypesShowcase
         return null;
     }
     /**
-     * TypeScript: any  →  PHPStan: mixed（部分再現）
+     * TypeScript: any
+     * PHPStan: mixed（部分再現）
      * TypeScript の any は型チェックを完全にスキップする。
      * PHPStan の mixed は any と異なり型チェックの対象になるため、完全な再現ではない。
      *
@@ -226,14 +216,101 @@ class TypesShowcase
         return null;
     }
     /**
+     * TypeScript: function f(): void
+     * PHPStan: PHP 7.1+ ネイティブ void 戻り値型（PHP では戻り値型専用、変数型としては使えない）
+     *
+     * @return void
+     */
+    public function voidReturn(): void
+    {
+    }
+    /**
+     * TypeScript: NonNullable<string | null>
+     * PHPStan: null を除いた型（string）
+     * NonNullable<T> は T から null/undefined を除去するユーティリティ型。
+     * type-bridge では型引数を解析して null を除去した結果を生成する。
+     *
+     * @return string
+     */
+    public function nonNullable(): mixed
+    {
+        return '';
+    }
+    /**
+     * TypeScript: keyof TsSimpleShape  →  keyof { id: number; name: string }
+     * PHPStan: key-of<array{id: int|float, name: string}>
+     * type-bridge は TypeOperatorNode (keyof) を検出し、参照先の型定義を展開して key-of<T> を生成する。
+     *
+     * @return key-of<array{id: int|float, name: string}>
+     */
+    public function keyofType(): mixed
+    {
+        return 'id';
+    }
+    /**
+     * TypeScript: TsOptionalShape['required']
+     * PHPStan: string（インデックスアクセス型をプロパティ型に解決）
+     * type-bridge は IndexedAccessTypeNode を検出し、参照先のオブジェクト型から
+     * 該当プロパティの型を取り出して具体的な PHP 型に変換する。
+     *
+     * @return string
+     */
+    public function offsetAccess(): mixed
+    {
+        return 'example';
+    }
+    /**
+     * TypeScript: Partial<{ name: string; age: number }>
+     * PHPStan: array{name?: string, age?: int|float}
+     * type-bridge は Partial<T> の型引数を解析し、全プロパティを optional: true に変換する。
+     * Mapped type 相当の変換を型引数がインラインオブジェクトの場合に自動生成できる。
+     *
+     * @return array{name?: string, age?: int|float}
+     */
+    public function partial(): mixed
+    {
+        return [];
+    }
+    /**
+     * TypeScript: Required<{ name?: string; age?: number }>
+     * PHPStan: array{name: string, age: int|float}
+     * type-bridge は Required<T> の型引数を解析し、全プロパティを optional: false に変換する。
+     *
+     * @return array{name: string, age: int|float}
+     */
+    public function required(): mixed
+    {
+        return ['name' => '', 'age' => 0];
+    }
+    // =========================================================================
+    // 手動サンプル: type-bridge では再現不可
+    // =========================================================================
+    /** @var array{red: string, green: string, blue: string} */
+    public const COLORS = ['red' => '#f00', 'green' => '#0f0', 'blue' => '#00f'];
+    /**
+     * TypeScript: keyof T / T[keyof T]（クラス定数版）
+     * PHPStan:    key-of<T> / value-of<T>（クラス定数・enum に対して動作）
+     *
+     * ─── type-bridge では再現不可 ───────────────────────────────────────────
+     * key-of<self::COLORS> は PHP クラス定数を参照する PHP 固有の構文であり、
+     * TypeScript には PHP クラス定数に相当する概念がないため変換対象外。
+     * keyof + オブジェクト型の場合は keyofType() メソッドを参照。
+     *
+     * @param key-of<self::COLORS> $key
+     * @return value-of<self::COLORS>
+     */
+    public function colorByKey(string $key): string
+    {
+        return self::COLORS[$key];
+    }
+    /**
      * TypeScript: T extends U ? X : Y（部分再現）/ infer（再現不可）
      * PHPStan:    @template + 条件型（戻り値の絞り込みに限り対応）
      *
-     * conditional type は PHPStan の (T is X ? A : B) 構文で表現できるが、
-     * `@template` で T の範囲を事前に固定する必要があり、型の組み合わせは手書きで列挙するしかない。
-     *
-     * infer は「T extends Array<infer U> ? U : never」のように型を動的に抽出・束縛するが、
-     * PHPStan にはこの概念が存在しないため再現不可。
+     * ─── type-bridge では再現不可 ───────────────────────────────────────────
+     * PHPStan の条件型は TypeScript とは構文が異なり、@template で T の範囲を事前に固定する必要がある。
+     * type-bridge は @template を持つ関数シグネチャを JSON で表現できないため自動変換不可。
+     * infer は PHPStan に相当する概念がなく、再現不可。
      *
      * @template T of int|list<int>
      * @param T $value
@@ -247,52 +324,12 @@ class TypesShowcase
         return [];
     }
     /**
-     * TypeScript: Partial<{ name: string; age: number }>（部分再現）
-     * PHPStan:    全プロパティに ? を付けた array{...} を手動で記述（ジェネリック変換不可）
-     * Mapped types が必要なため、特定の型に対してのみ手動で再現できる。
-     *
-     * @return array{name?: string, age?: int|float}
-     */
-    public function partial(): mixed
-    {
-        return [];
-    }
-    /**
-     * TypeScript: Required<{ name?: string; age?: number }>（部分再現）
-     * PHPStan:    全プロパティから ? を除いた array{...} を手動で記述（ジェネリック変換不可）
-     * Mapped types が必要なため、特定の型に対してのみ手動で再現できる。
-     *
-     * @return array{name: string, age: int|float}
-     */
-    public function required(): mixed
-    {
-        return ['name' => '', 'age' => 0];
-    }
-    /**
-     * TypeScript: NonNullable<string | null>（部分再現）
-     * PHPStan:    |null を除いた型を手動で記述（ジェネリック変換不可）
-     * 特定の型に対しては null を含まない型として表現できるが、
-     * ジェネリックな NonNullable<T> に相当する PHPStan 構文は存在しない。
-     *
-     * @return string
-     */
-    public function nonNullable(): mixed
-    {
-        return '';
-    }
-    /**
-     * TypeScript: function f(): void
-     * PHPStan:    PHP 7.1+ ネイティブ void 戻り値型 / @return void
-     * TypeScript の void は変数型としても使えるが、PHP では戻り値型専用。
-     *
-     * @return void
-     */
-    public function voidReturn(): void
-    {
-    }
-    /**
      * TypeScript: function identity<T>(arg: T): T
      * PHPStan:    @template
+     *
+     * ─── type-bridge では再現不可 ───────────────────────────────────────────
+     * TypeScript のジェネリック関数は PHPDoc @template と概念は近いが、
+     * type-bridge が扱う型エイリアス（type T = ...）では関数シグネチャの型変数を表現できない。
      *
      * @template T
      * @param T $value
@@ -306,6 +343,10 @@ class TypesShowcase
      * TypeScript: function wrap<T extends object>(arg: T): { value: T }
      * PHPStan:    @template T of object（上限制約）
      *
+     * ─── type-bridge では再現不可 ───────────────────────────────────────────
+     * template の上限制約（T of object）は TypeScript の extends 制約に相当するが、
+     * 関数シグネチャの template 宣言は type-bridge の変換対象外。
+     *
      * @template T of object
      * @param T $value
      * @return array{value: T}
@@ -317,6 +358,9 @@ class TypesShowcase
     /**
      * TypeScript: function pair<T, U>(a: T, b: U): [T, U]
      * PHPStan:    複数 @template
+     *
+     * ─── type-bridge では再現不可 ───────────────────────────────────────────
+     * 複数の型変数を持つジェネリック関数は type-bridge の変換対象外。
      *
      * @template T
      * @template U
@@ -332,6 +376,10 @@ class TypesShowcase
 /**
  * TypeScript: Readonly<T>（部分再現）
  * PHPStan:    PHP 8.1+ readonly プロパティ（配列形状 array{...} への適用は不可）
+ *
+ * ─── type-bridge では再現不可 ───────────────────────────────────────────────
+ * PHP の readonly はプロパティ単位の宣言であり、TypeScript の Readonly<T>（Mapped type）を
+ * 汎用的に変換する仕組みは type-bridge では持てない。
  */
 class ReadonlyExample
 {
@@ -342,6 +390,10 @@ class ReadonlyExample
 /**
  * TypeScript: class Box<T> { constructor(private value: T) {} get(): T }
  * PHPStan:    クラス docblock に @template を付与してジェネリッククラスを表現
+ *
+ * ─── type-bridge では再現不可 ───────────────────────────────────────────────
+ * クラスレベルの @template は PHP 固有の PHPDoc 構文であり、
+ * TypeScript のクラス定義から自動生成する手段がない。
  *
  * @template T
  */

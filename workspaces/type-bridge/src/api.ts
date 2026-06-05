@@ -5,10 +5,19 @@
 export type GetParam = 'greeting' | 'name';
 
 /**
- * Keys accepted in FormData POST requests to /api/upload.
- * Synced to PHP $key annotations via the type bridge pipeline.
+ * Shape of the FormData body for POST /api/upload.
+ * Keys are synced to PHP $key annotations via the type bridge pipeline.
  */
-export type PostFormDataKey = 'file' | 'label';
+export type PostFormDataBody = {
+  file: File;
+  label: string;
+};
+
+/**
+ * Keys accepted in FormData POST requests to /api/upload.
+ * Derived from PostFormDataBody — synced to PHP $key annotations via the type bridge pipeline.
+ */
+export type PostFormDataKey = keyof PostFormDataBody;
 
 /**
  * Shape of the JSON body for POST /api/data.

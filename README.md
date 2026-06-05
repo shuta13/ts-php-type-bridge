@@ -120,11 +120,19 @@ npm run phpstan
 `workspaces/type-bridge/src/showcase.ts` に TypeScript 型を定義します。
 
 ```typescript
-export type TsString  = string;
-export type TsStatus  = 'draft' | 'published' | 'archived';
-export type TsNested  = { user: { name: string; address: { city: string; zip: number } } };
-export type TsNever   = never;
-// ... その他多数
+export type TsString   = string;
+export type TsStatus   = 'draft' | 'published' | 'archived';
+export type TsNested   = { user: { name: string; address: { city: string; zip: number } } };
+export type TsNever    = never;
+export type TsVoid     = void;
+export type TsPartial  = Partial<{ name: string; age: number }>;
+
+// keyof T → 参照先の型定義を展開して key-of<T> を生成
+export type TsSimpleShape = { id: number; name: string };
+export type TsKeyOf       = keyof TsSimpleShape;
+
+// T['key'] → 参照先のプロパティ型に解決
+export type TsIndexedAccess = TsOptionalShape['required'];
 ```
 
 ブリッジを実行します。
@@ -139,24 +147,46 @@ npm run bridge:showcase
 
 ## 型マッピング早見表
 
-| TypeScript | PHPStan / PHPDoc |
+### bridge で自動変換できる型
+
+| TypeScript | PHPStan / PHPDoc | 備考 |
+|---|---|---|
+| `string` | `string` | |
+| `number` | `int\|float` | |
+| `boolean` | `bool` | |
+| `null` | `null` | |
+| `undefined` | `null` | |
+| `unknown` | `mixed` | TS の「絞り込み前は使用不可」という安全性は PHPStan の `mixed` では再現不可 |
+| `any` | `mixed` | TS の型チェックスキップ意味論は PHPStan の `mixed` と一致しない |
+| `never` | `never` | |
+| `void` | `void` | PHP では戻り値型専用 |
+| `'a' \| 'b'` | `'a'\|'b'` | |
+| `1 \| 2` | `1\|2` | |
+| `string \| null` | `string\|null` | |
+| `string \| number \| boolean` | `string\|int\|float\|bool` | |
+| `string[]` / `Array<T>` | `list<string>` / `list<T>` | |
+| `[string, number]` | `array{0: string, 1: int\|float}` | |
+| `Record<string, number>` | `array<string, int\|float>` | |
+| `{ name: string; age?: number }` | `array{name: string, age?: int\|float}` | |
+| `{ required: string; [key: string]: unknown }` | `array{required: string, ...<string, mixed>}` | PHPStan 2.2+ Unsealed Array Shapes |
+| `{ name: string } & { age: number }` | `array{name: string, ...}&array{age: int\|float, ...}` | |
+| `NonNullable<string \| null>` | `string` | null を除去して解決 |
+| `Partial<T>` | 全プロパティが `?` の `array{...}` | 型引数が同ファイル内のインラインオブジェクトの場合 |
+| `Required<T>` | 全プロパティが非 `?` の `array{...}` | 型引数が同ファイル内のインラインオブジェクトの場合 |
+| `keyof T` | `key-of<array{...}>` | 同ファイル内の型エイリアス参照を展開して変換 |
+| `T['key']` | プロパティ型に解決 | 同ファイル内の型エイリアス参照を展開して変換 |
+
+### bridge では再現不可な型
+
+| TypeScript | 理由 |
 |---|---|
-| `string` | `string` |
-| `number` | `int\|float` |
-| `boolean` | `bool` |
-| `null` | `null` |
-| `undefined` | `null` |
-| `unknown` / `any` | `mixed` |
-| `never` | `never` |
-| `'a' \| 'b'` | `'a'\|'b'` |
-| `1 \| 2` | `1\|2` |
-| `string \| null` | `string\|null` |
-| `string[]` / `Array<T>` | `list<string>` / `list<T>` |
-| `[string, number]` | `array{0: string, 1: int\|float}` |
-| `Record<string, number>` | `array<string, int\|float>` |
-| `{ name: string; age?: number }` | `array{name: string, age?: int\|float}` |
-| `{ required: string; [key: string]: unknown }` | `array{required: string, ...<string, mixed>}` |
-| `{ name: string } & { age: number }` | `array{name: string, ...}&array{age: int\|float, ...}` |
+| `key-of<self::CONST>`（PHP クラス定数版 keyof） | PHP クラス定数を参照する構文であり、TypeScript に対応物がない |
+| `T extends U ? X : Y`（条件型） | PHPStan の条件型は `@template` 手書きが必要で、型エイリアスから自動生成できない |
+| Generics（`@template`） | 関数シグネチャの型変数は型エイリアス (`type T = ...`) で表現できない |
+| Mapped types（`{ [K in keyof T]: ... }`） | PHP/PHPStan に対応する汎用構文がない |
+| `Readonly<T>` | PHP の `readonly` はプロパティ単位の宣言でジェネリック変換不可 |
+| `symbol` | PHP にシンボルの概念がなく PHPStan にも対応型なし |
+| Template literal types（`` `${string}Id` ``） | 対応する PHPStan 構文なし |
 
 ---
 

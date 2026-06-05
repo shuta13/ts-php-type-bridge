@@ -9,6 +9,7 @@ export default function Home() {
   const [getResult, setGetResult] = useState<Result>(null);
   const [formDataResult, setFormDataResult] = useState<Result>(null);
   const [jsonResult, setJsonResult] = useState<Result>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const handleGet = async () => {
     try {
@@ -21,7 +22,10 @@ export default function Home() {
 
   const handlePostFormData = async () => {
     try {
-      const res = await apiPostFormData({ label: 'demo-upload' });
+      const payload = selectedFile
+        ? { file: selectedFile, label: selectedFile.name }
+        : { label: 'demo-upload' };
+      const res = await apiPostFormData(payload);
       setFormDataResult({ data: await res.json() });
     } catch (e) {
       setFormDataResult({ data: null, error: String(e) });
@@ -69,6 +73,11 @@ export default function Home() {
         <p style={{ fontSize: '0.85rem', marginBottom: '0.75rem', color: '#555' }}>
           Keys typed as <code>PostFormDataKey = &apos;file&apos; | &apos;label&apos;</code>
         </p>
+        <input
+          type="file"
+          onChange={(e) => setSelectedFile(e.target.files?.[0] ?? null)}
+          style={{ display: 'block', marginBottom: '0.5rem' }}
+        />
         <button onClick={handlePostFormData}>Send POST FormData</button>
         {formDataResult?.error && <p className="error">{formDataResult.error}</p>}
         {formDataResult?.data !== null && formDataResult?.data !== undefined && (

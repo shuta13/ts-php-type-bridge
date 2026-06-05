@@ -1,4 +1,4 @@
-import type { GetParam, PostFormDataKey, PostJsonKey } from 'type-bridge';
+import type { GetParam, PostFormDataBody, PostJsonKey } from 'type-bridge';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:9999';
 
@@ -16,10 +16,10 @@ export async function apiGet(params: Partial<Record<GetParam, string>>): Promise
 
 /**
  * POST /api/upload.php with FormData
- * Keys are constrained to PostFormDataKey from the shared type-bridge package.
+ * Shape is constrained to PostFormDataBody from the shared type-bridge package.
  */
 export async function apiPostFormData(
-  data: Partial<Record<PostFormDataKey, string | Blob>>,
+  data: Partial<PostFormDataBody>,
 ): Promise<Response> {
   const formData = new FormData();
   for (const [key, value] of Object.entries(data)) {

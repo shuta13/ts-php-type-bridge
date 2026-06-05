@@ -60,3 +60,33 @@ export type TsIntersection = { name: string } & { age: number };
 
 // 14. never型
 export type TsNever = never;
+
+// 15. unknown型
+export type TsUnknown = unknown;
+
+// 16. any型
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type TsAny = any;
+
+// 17. void型
+export type TsVoid = void;
+
+// 18. undefined型
+export type TsUndefined = undefined;
+
+// 19. NonNullable ユーティリティ型
+export type TsNonNullable = NonNullable<string | null>;
+
+// 20. keyof T → key-of<T>
+// 参照型解決のデモ: TsSimpleShape は同ファイル内の型エイリアスを参照する
+export type TsSimpleShape = { id: number; name: string };
+export type TsKeyOf = keyof TsSimpleShape;
+
+// 21. T['key'] インデックスアクセス型 → プロパティ型に解決
+export type TsIndexedAccess = TsOptionalShape['required'];
+
+// 22. Partial<T> → 全プロパティを optional に
+export type TsPartial = Partial<{ name: string; age: number }>;
+
+// 23. Required<T> → 全プロパティから optional を除去
+export type TsRequired = Required<{ name?: string; age?: number }>;

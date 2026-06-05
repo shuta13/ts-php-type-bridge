@@ -166,5 +166,70 @@
       }
     ]
   },
-  "TsNever": "never"
+  "TsNever": "never",
+  "TsUnknown": "unknown",
+  "TsAny": "any",
+  "TsVoid": "void",
+  "TsUndefined": "undefined",
+  "TsNonNullable": "string",
+  "TsSimpleShape": {
+    "__kind": "object",
+    "properties": {
+      "id": {
+        "type": "number",
+        "optional": false
+      },
+      "name": {
+        "type": "string",
+        "optional": false
+      }
+    },
+    "sealed": true
+  },
+  "TsKeyOf": {
+    "__kind": "keyof",
+    "operand": {
+      "__kind": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "optional": false
+        },
+        "name": {
+          "type": "string",
+          "optional": false
+        }
+      },
+      "sealed": true
+    }
+  },
+  "TsIndexedAccess": "string",
+  "TsPartial": {
+    "__kind": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "optional": true
+      },
+      "age": {
+        "type": "number",
+        "optional": true
+      }
+    },
+    "sealed": true
+  },
+  "TsRequired": {
+    "__kind": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "optional": false
+      },
+      "age": {
+        "type": "number",
+        "optional": false
+      }
+    },
+    "sealed": true
+  }
 }
