@@ -226,8 +226,14 @@ class TypesShowcase
         return null;
     }
     /**
-     * TypeScript: T extends U ? X : Y（部分再現）/ infer（部分再現）
+     * TypeScript: T extends U ? X : Y（部分再現）/ infer（再現不可）
      * PHPStan:    @template + 条件型（戻り値の絞り込みに限り対応）
+     *
+     * conditional type は PHPStan の (T is X ? A : B) 構文で表現できるが、
+     * `@template` で T の範囲を事前に固定する必要があり、型の組み合わせは手書きで列挙するしかない。
+     *
+     * infer は「T extends Array<infer U> ? U : never」のように型を動的に抽出・束縛するが、
+     * PHPStan にはこの概念が存在しないため再現不可。
      *
      * @template T of int|list<int>
      * @param T $value
