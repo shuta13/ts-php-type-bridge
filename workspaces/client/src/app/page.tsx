@@ -22,10 +22,9 @@ export default function Home() {
 
   const handlePostFormData = async () => {
     try {
-      const payload = selectedFile
-        ? { file: selectedFile, label: selectedFile.name }
-        : { label: 'demo-upload' };
-      const res = await apiPostFormData(payload);
+      const res = await apiPostFormData(selectedFile
+        ? { file: selectedFile, name: selectedFile.name }
+        : { label: 'demo-upload' });
       setFormDataResult({ data: await res.json() });
     } catch (e) {
       setFormDataResult({ data: null, error: String(e) });
